@@ -1,19 +1,16 @@
 import time as _time
-
 from types import MethodType as _MethodType
-
 from typing import Iterable as _Iterable
 from typing import List as _List
 from typing import Optional as _Optional
 from typing import Tuple as _Tuple
 from typing import Type as _Type
 from typing import TypeVar as _TypeVar
-
 from weakref import ref as _ref
 from weakref import WeakMethod as _WeakMethod
 
 
-version = '2.4'
+version = "2.4"
 
 
 ###################
@@ -40,6 +37,7 @@ def dispatch_event(name: str, *args) -> None:
 
 def _make_callback(name: str):
     """Create an internal callback to remove dead handlers."""
+
     def callback(weak_method):
         event_registry[name].remove(weak_method)
         if not event_registry[name]:
@@ -85,7 +83,7 @@ def remove_handler(name: str, func) -> None:
 ###################
 
 
-_C = _TypeVar('_C')
+_C = _TypeVar("_C")
 
 
 class Processor:
@@ -211,7 +209,6 @@ class World:
         entity = self._next_entity_id
 
         for component_instance in components:
-
             component_type = type(component_instance)
 
             if component_type not in self._components:
@@ -359,18 +356,14 @@ class World:
         try:
             return self._get_component_cache[component_type]
         except KeyError:
-            return self._get_component_cache.setdefault(
-                component_type, list(self._get_component(component_type))
-            )
+            return self._get_component_cache.setdefault(component_type, list(self._get_component(component_type)))
 
     def get_components(self, *component_types: _Type[_C]) -> _List[_Tuple[int, _List[_C]]]:
         """Get an iterator for Entity and multiple Component sets."""
         try:
             return self._get_components_cache[component_types]
         except KeyError:
-            return self._get_components_cache.setdefault(
-                component_types, list(self._get_components(*component_types))
-            )
+            return self._get_components_cache.setdefault(component_types, list(self._get_components(*component_types)))
 
     def try_component(self, entity: int, component_type: _Type[_C]) -> _Optional[_C]:
         """Try to get a single component type for an Entity.
@@ -404,7 +397,6 @@ class World:
         be duplicated here as well.
         """
         for entity in self._dead_entities:
-
             for component_type in self._entities[entity]:
                 self._components[component_type].discard(entity)
 

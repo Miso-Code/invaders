@@ -18,11 +18,15 @@
     ],
     "number_of_stars": 25,
     "vertical_speed": {
-        "min": 10,
-        "max": 30
+        "min": 50,
+        "max": 100
     },
     "blink_rate": {
         "min": 0.25,
         "max": 0.5
+    },
+    "star_size": {
+        "min": 3,
+        "max": 5
     }
 }
