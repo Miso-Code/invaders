@@ -1,4 +1,17 @@
 {
-  "image": "assets/img/player.png",
-  "speed": 30
+  "image": "assets/img/invaders_char.png",
+  "speed": 100,
+  "bullet": {
+    "size": {
+      "width": 1,
+      "height": 4
+    },
+    "speed": 300,
+    "color": {
+      "r": 230,
+      "g": 100,
+      "b": 30
+    },
+    "sound": "assets/snd/player_shoot.ogg"
+  }
 }

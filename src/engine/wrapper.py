@@ -14,8 +14,8 @@ class PyGameWrapper:
     def quit(self):
         self.instance.quit()
 
-    def display_set_mode(self, size):
-        return self.instance.display.set_mode(size)
+    def display_set_mode(self, size, *args, **kwargs):
+        return self.instance.display.set_mode(size, *args, **kwargs)
 
     def set_caption(self, caption):
         self.instance.display.set_caption(caption)

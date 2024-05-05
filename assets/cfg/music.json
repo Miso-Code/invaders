@@ -1,0 +1,6 @@
+{
+    "loop": "assets/snd/game_loop.ogg",
+    "game_start": "assets/snd/game_start.ogg",
+    "game_over": "assets/snd/game_over.ogg",
+    "game_paused": "assets/snd/game_paused.ogg"
+}

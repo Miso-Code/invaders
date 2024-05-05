@@ -4,13 +4,16 @@ import pygame
 
 FILE_PATH_MAP = {
     "window_cfg": "./assets/cfg/window.json",
-    "level_cfg": "./assets/cfg/level_01.json",
+    "level_cfg": "./assets/cfg/level.json",
     "enemies_cfg": "./assets/cfg/enemies.json",
     "player_cfg": "./assets/cfg/player.json",
     "bullet_cfg": "./assets/cfg/bullet.json",
     "explosion_cfg": "./assets/cfg/explosion.json",
     "interface_cfg": "./assets/cfg/interface.json",
     "star_field_cfg": "./assets/cfg/starfield.json",
+    "music_cfg": "./assets/cfg/music.json",
+    "enemy_explosion_cfg": "./assets/cfg/enemy_explosion.json",
+    "player_explosion_cfg": "./assets/cfg/player_explosion.json",
 }
 
 

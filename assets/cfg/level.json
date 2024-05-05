@@ -1,0 +1,46 @@
+{
+    "enemies_organization": [
+        {
+            "type": "enemy_1",
+            "count": 10,
+            "position": 5,
+            "distribution": "uniform",
+            "alignment": "center"
+        },
+        {
+            "type": "enemy_1",
+            "count": 10,
+            "position": 4,
+            "distribution": "uniform",
+            "alignment": "center"
+        },
+        {
+            "type": "enemy_1",
+            "count": 10,
+            "position": 3,
+            "distribution": "uniform",
+            "alignment": "center"
+        },
+        {
+            "type": "enemy_2",
+            "count": 8,
+            "position": 2,
+            "distribution": "uniform",
+            "alignment": "center"
+        },
+        {
+            "type": "enemy_3",
+            "count": 6,
+            "position": 1,
+            "distribution": "uniform",
+            "alignment": "center"
+        },
+        {
+            "type": "enemy_4",
+            "count": 2,
+            "position": 0,
+            "distribution": "uniform",
+            "alignment": "custom"
+        }
+    ]
+}

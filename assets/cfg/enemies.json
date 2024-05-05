@@ -1,62 +1,104 @@
 {
-    "enemy_1":{
-        "image": "assets/img/invaders_enemy_01.png",
-        "animations": {
-            "number_frames": 5,
-            "list": [
-                {
-                    "name": "MOVE",
-                    "start": 0,
-                    "end": 4,
-                    "framerate": 10
-                }
-            ]
-        },
-        "chasing_speed": 20
+  "enemy_1": {
+    "image": "assets/img/invaders_enemy_01.png",
+    "animations": {
+      "number_frames": 5,
+      "list": [
+        {
+          "name": "MOVE",
+          "start": 0,
+          "end": 5,
+          "framerate": 5
+        }
+      ]
     },
-    "enemy_2":{
-        "image": "assets/img/invaders_enemy_02.png",
-        "animations": {
-            "number_frames": 5,
-            "list": [
-                {
-                    "name": "MOVE",
-                    "start": 0,
-                    "end": 4,
-                    "framerate": 10
-                }
-            ]
-        },
-        "chasing_speed": 20
-    },
-    "enemy_3":{
-        "image": "assets/img/invaders_enemy_03.png",
-        "animations": {
-            "number_frames": 5,
-            "list": [
-                {
-                    "name": "MOVE",
-                    "start": 0,
-                    "end": 4,
-                    "framerate": 10
-                }
-            ]
-        },
-        "chasing_speed": 20
-    },
-    "enemy_4":{
-        "image": "assets/img/invaders_enemy_04.png",
-        "animations": {
-            "number_frames": 5,
-            "list": [
-                {
-                    "name": "MOVE",
-                    "start": 0,
-                    "end": 4,
-                    "framerate": 10
-                }
-            ]
-        },
-        "chasing_speed": 20
+    "chasing_speed": 20,
+    "points": 10,
+    "bullet": {
+      "number": 1,
+      "size": {
+        "width": 1,
+        "height": 3
+      },
+      "speed": 150,
+      "color": {
+        "r": 200,
+        "g": 200,
+        "b": 200
+      }
     }
+  },
+  "enemy_2": {
+    "image": "assets/img/invaders_enemy_02.png",
+    "animations": {
+      "number_frames": 5,
+      "list": [
+        {
+          "name": "MOVE",
+          "start": 0,
+          "end": 5,
+          "framerate": 5
+        }
+      ]
+    },
+    "chasing_speed": 20,
+    "bullet": {
+      "number": 2,
+      "size": {
+        "width": 1,
+        "height": 3
+      },
+      "speed": 150,
+      "color": {
+        "r": 200,
+        "g": 200,
+        "b": 200
+      }
+    }
+  },
+  "enemy_3": {
+    "image": "assets/img/invaders_enemy_03.png",
+    "animations": {
+      "number_frames": 5,
+      "list": [
+        {
+          "name": "MOVE",
+          "start": 1,
+          "end": 5,
+          "framerate": 5
+        }
+      ]
+    },
+    "chasing_speed": 20,
+    "bullet": {
+      "number": 3,
+      "size": {
+        "width": 1,
+        "height": 3
+      },
+      "speed": 150,
+      "color": {
+        "r": 200,
+        "g": 200,
+        "b": 200
+      }
+    }
+  },
+  "enemy_4": {
+    "image": "assets/img/invaders_enemy_04.png",
+    "chasing_speed": 20,
+    "bullet": {
+      "number": 4,
+      "size": {
+        "width": 1,
+        "height": 3
+      },
+      "speed": 150,
+      "color": {
+        "r": 200,
+        "g": 200,
+        "b": 200
+      }
+    }
+  }
 }
