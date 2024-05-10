@@ -60,7 +60,7 @@ def create_stars(world: esper.World, config, screen):
         x_size = width
         color = random.choice(stars_colors)
         x = random.randint(0, screen.get_width())
-        y = -10
+        y = random.randint(0, screen.get_height())
         speed_component = CSpeed(engine.Vector2(0, speed))
         surface_component = CSurface(engine.Vector2(x_size, y_size), engine.Color(*color))
         transform_component = CTransform(engine.Vector2(x, y))
@@ -176,3 +176,9 @@ def create_inputs(world: esper.World):
     world.add_component(a_input, CInputCommand("PLAYER_LEFT", engine.K_a))
     world.add_component(right_input, CInputCommand("PLAYER_RIGHT", engine.K_RIGHT))
     world.add_component(d_input, CInputCommand("PLAYER_RIGHT", engine.K_d))
+
+
+def create_main_menu_inputs(world: esper.World):
+    # Keyboard inputs
+    start_game_input = world.create_entity()
+    world.add_component(start_game_input, CInputCommand("START_GAME", engine.K_SPACE))

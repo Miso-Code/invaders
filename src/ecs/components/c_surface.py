@@ -15,3 +15,8 @@ class CSurface:
         instance.surface = surface
         instance.area = instance.surface.get_rect()
         return instance
+
+    @classmethod
+    def from_text(cls, text: str, font, color):
+        text_surface = font.render(text, True, color)
+        return cls.from_surface(text_surface)

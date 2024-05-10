@@ -1,7 +1,5 @@
 from typing import Callable
 
-import pygame.event
-
 import esper
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_input_command import CommandPhase
@@ -10,7 +8,7 @@ from src.engine.wrapper import PyGameWrapper
 engine = PyGameWrapper().engine
 
 
-def system_input_player(world: esper.World, event: pygame.event.Event, do_action: Callable[[CInputCommand], None]):
+def system_input_player(world: esper.World, event: engine.event.Event, do_action: Callable[[CInputCommand], None]):
     components = world.get_component(CInputCommand)
 
     for _, command in components:

@@ -1,4 +1,8 @@
 {
+    "font": "assets/fnt/PressStart2P.ttf",
+    "title_font_size": 8,
+    "normal_font_size": 6,
+    "high_score_font_size": 8,
     "title_text_color": {
         "r": 255,
         "g": 0,
