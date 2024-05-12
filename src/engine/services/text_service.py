@@ -6,10 +6,16 @@ class TextService:
         pygame.font.init()
         self._font = pygame.font.SysFont("Arial", 24)
         self._color = pygame.Color("white")
+        self._fonts = {}
 
     def write(self, surface, text, position):
         text_surface = self.font.render(text, True, self.color)
         surface.blit(text_surface, position)
+
+    def get(self, path: str, size: int) -> pygame.font.Font:
+        if path not in self._fonts:
+            self._fonts[(path, size)] = pygame.font.Font(path, size)
+        return self._fonts[(path, size)]
 
     @property
     def font(self):

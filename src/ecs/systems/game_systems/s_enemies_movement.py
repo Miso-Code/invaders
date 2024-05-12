@@ -1,5 +1,6 @@
 import esper
 from src.ecs.components.c_enemy_metadata import CEnemyMetadata
+from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
@@ -12,7 +13,7 @@ speed_direction = -1
 
 def system_enemies_movement(world: esper.World, delta_time: float, screen) -> None:
     global speed_direction
-    components = world.get_components(CTransform, CSurface, CTagEnemy, CEnemyMetadata)
+    components = world.get_components(CTransform, CSurface, CTagEnemy, CMetadata)
     most_left_enemy = None
     most_right_enemy = None
     for entity, (c_transform, c_surface, c_tag, c_metadata) in components:

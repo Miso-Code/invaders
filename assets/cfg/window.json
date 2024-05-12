@@ -9,5 +9,6 @@
         "g": 0,
         "b": 0
     },
+    "invaders_img": "assets/img/invaders_logo_title.png",
     "framerate": 60
 }

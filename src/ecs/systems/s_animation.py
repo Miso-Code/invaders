@@ -1,3 +1,5 @@
+import math
+
 import esper
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_surface import CSurface
@@ -16,3 +18,6 @@ def system_animation(world: esper.World, delta_time: float):
             rect_surface = c_surface.surface.get_rect()
             c_surface.area.w = rect_surface.w / c_animation.number_frames
             c_surface.area.x = c_surface.area.w * c_animation.current_frame
+
+            c_surface.area.x = c_surface.area.w * (c_animation.current_frame % c_animation.number_frames)
+            c_surface.area.y = c_surface.area.h * math.floor(c_animation.current_frame / c_animation.number_frames)

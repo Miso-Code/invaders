@@ -3,8 +3,8 @@ import random
 import esper
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_blink import CBlink
-from src.ecs.components.c_enemy_metadata import CEnemyMetadata
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
@@ -60,14 +60,18 @@ def create_stars(world: esper.World, config, screen):
         x_size = width
         color = random.choice(stars_colors)
         x = random.randint(0, screen.get_width())
-        y = -10
+        y = random.randint(0, screen.get_height())
         speed_component = CSpeed(engine.Vector2(0, speed))
         surface_component = CSurface(engine.Vector2(x_size, y_size), engine.Color(*color))
         transform_component = CTransform(engine.Vector2(x, y))
         blink_component = CBlink(blink_rate)
         tag_component = CTagStar()
-
-        create_square(world, surface_component, transform_component, speed_component, tag_component, blink=blink_component)
+        star_metadata = CMetadata(
+            {
+                "type": "star",
+            },
+        )
+        create_square(world, surface_component, transform_component, speed_component, tag_component, blink=blink_component, metadata=star_metadata)
 
 
 def create_player(world, player_config, screen):
@@ -76,7 +80,17 @@ def create_player(world, player_config, screen):
     screen_width, screen_height = screen.get_size()
     player_position = engine.Vector2(screen_width / 2 - (player_size[0] / 2), screen_height - player_size[1] - 10)
     player_speed = engine.Vector2(0, 0)
-    return create_sprite(world, player_surface, player_position, speed=CSpeed(player_speed), tag=CTagPlayer())
+    player_metadata = CMetadata(
+        {
+            "type": "player",
+            "is_killed": False,
+            "is_respawning": True,
+            "respawn_timer": player_config.respawn_time,
+            "lives": player_config.life,
+            "score": 0,
+        },
+    )
+    return create_sprite(world, player_surface, player_position, speed=CSpeed(player_speed), tag=CTagPlayer(), metadata=player_metadata)
 
 
 def create_player_bullet(world, player_cfg, player_position, player_surface):
@@ -86,7 +100,12 @@ def create_player_bullet(world, player_cfg, player_position, player_surface):
     bullet_surface = CSurface(engine.Vector2(bullet_size.width, bullet_size.height), engine.Color(bullet_color.r, bullet_color.g, bullet_color.b))
     bullet_speed = engine.Vector2(0, -player_cfg.bullet.speed)
     bullet_position = engine.Vector2(player_position.x + player_surface.area.width / 2 - bullet_size.width / 2, player_position.y)
-    return create_square(world, bullet_surface, CTransform(bullet_position), CSpeed(bullet_speed), CTagPlayerBullet())
+    bullet_metadata = CMetadata(
+        {
+            "type": "player_bullet",
+        },
+    )
+    return create_square(world, bullet_surface, CTransform(bullet_position), CSpeed(bullet_speed), CTagPlayerBullet(), metadata=bullet_metadata)
 
 
 def create_enemy(world: esper.World, enemy_surface, position, speed, **kwargs):
@@ -103,7 +122,7 @@ def create_enemies(world: esper.World, level_config, enemy_config, screen):
     all_enemies_width = 0
     x_initial_position = 0
     x_initial_offset = 0
-    y_initial_offset = 30
+    y_initial_offset = 50
     for row, enemies_row in enumerate(enemies_organization):
         enemies_in_current_row = enemies_row.count
         enemy = getattr(enemy_config, enemies_row.type)
@@ -130,16 +149,22 @@ def create_enemies(world: esper.World, level_config, enemy_config, screen):
                 x_initial_offset = enemy_size[0] / max_enemies_per_row + initial_offset
 
             x_offset += x_initial_offset + initial_offset
-            enemy_metadata = CEnemyMetadata(
-                bullet_cfg=enemy.bullet,
-                chasing_speed=enemy.chasing_speed,
+            enemy_metadata = CMetadata(
+                {
+                    "type": "enemy",
+                    "bullet_cfg": enemy.bullet,
+                    "chasing_speed": enemy.chasing_speed,
+                    "is_chasing": False,
+                    "is_killed": False,
+                    "points": enemy.points,
+                },
             )
             if hasattr(enemy, "animations") and loops_to_wait <= enemy_index < (enemies_in_current_row + loops_to_wait):
                 animations = CAnimation(enemy.animations)
-                enemies[row][enemy_index] = create_enemy(world, enemy_surface, position, speed, tag=tag, animations=animations, enemy_metadata=enemy_metadata)
+                enemies[row][enemy_index] = create_enemy(world, enemy_surface, position, speed, tag=tag, animations=animations, metadata=enemy_metadata)
             elif enemy_index == 3 or enemy_index == 6:
                 position.x -= 1
-                enemies[row][enemy_index] = create_enemy(world, enemy_surface, position, speed, tag=tag, enemy_metadata=enemy_metadata)
+                enemies[row][enemy_index] = create_enemy(world, enemy_surface, position, speed, tag=tag, metadata=enemy_metadata)
         x_offset = 0
     return enemies
 
@@ -151,7 +176,12 @@ def create_enemy_bullet(world, enemy_bullet_config, enemy_position, enemy_surfac
     bullet_surface = CSurface(engine.Vector2(bullet_size.width, bullet_size.height), engine.Color(bullet_color.r, bullet_color.g, bullet_color.b))
     bullet_speed = engine.Vector2(0, enemy_bullet_config.speed)
     bullet_position = engine.Vector2(enemy_position.x + enemy_surface.area.width / 2 - bullet_size.width / 2, enemy_position.y)
-    return create_square(world, bullet_surface, CTransform(bullet_position), CSpeed(bullet_speed), CTagEnemyBullet())
+    bullet_metadata = CMetadata(
+        {
+            "type": "enemy_bullet",
+        },
+    )
+    return create_square(world, bullet_surface, CTransform(bullet_position), CSpeed(bullet_speed), CTagEnemyBullet(), metadata=bullet_metadata)
 
 
 def create_explosion(world, position, surface, config):
@@ -160,7 +190,12 @@ def create_explosion(world, position, surface, config):
     explosion_position = engine.Vector2(position.position.x + surface.area.width / 2 - explosion_size[0] / 2, position.position.y + surface.area.height / 2 - explosion_size[1] / 2)
     explosion_surface = image_service.get(config.image)
     animations = CAnimation(config.animations)
-    return create_sprite(world, explosion_surface, explosion_position, tag=CTagExplosion(), animations=animations)
+    explosion_metadata = CMetadata(
+        {
+            "type": "explosion",
+        },
+    )
+    return create_sprite(world, explosion_surface, explosion_position, tag=CTagExplosion(), animations=animations, metadata=explosion_metadata)
 
 
 def create_inputs(world: esper.World):
@@ -176,3 +211,9 @@ def create_inputs(world: esper.World):
     world.add_component(a_input, CInputCommand("PLAYER_LEFT", engine.K_a))
     world.add_component(right_input, CInputCommand("PLAYER_RIGHT", engine.K_RIGHT))
     world.add_component(d_input, CInputCommand("PLAYER_RIGHT", engine.K_d))
+
+
+def create_main_menu_inputs(world: esper.World):
+    # Keyboard inputs
+    start_game_input = world.create_entity()
+    world.add_component(start_game_input, CInputCommand("START_GAME", engine.K_SPACE))

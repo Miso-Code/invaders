@@ -12,7 +12,7 @@ FILE_PATH_MAP = {
     "interface_cfg": "./assets/cfg/interface.json",
     "star_field_cfg": "./assets/cfg/starfield.json",
     "music_cfg": "./assets/cfg/music.json",
-    "enemy_explosion_cfg": "./assets/cfg/enemy_explosion.json",
+    "explosion": "./assets/cfg/enemy_explosion.json",
     "player_explosion_cfg": "./assets/cfg/player_explosion.json",
 }
 
