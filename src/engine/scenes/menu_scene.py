@@ -47,12 +47,14 @@ class MenuScene(Scene):
 
         high_score_color = self._game_engine.engine.Color(high_score_text_color.r, high_score_text_color.g, high_score_text_color.b)
 
+        screen_width = self._game_engine.screen.get_width()
+
         positions = [
-            self._game_engine.engine.Vector2(50, self.top_position),
-            self._game_engine.engine.Vector2(130, self.top_position),
-            self._game_engine.engine.Vector2(70, self.top_position + 10),
-            self._game_engine.engine.Vector2(155, self.top_position + 10),
-            self._game_engine.engine.Vector2(200, self.top_position + 180),
+            self._game_engine.engine.Vector2(screen_width // 6, self.top_position),
+            self._game_engine.engine.Vector2(2 * screen_width // 6, self.top_position),
+            self._game_engine.engine.Vector2(3 * screen_width // 14, self.top_position + 10),
+            self._game_engine.engine.Vector2(5 * screen_width // 12, self.top_position + 10),
+            self._game_engine.engine.Vector2(screen_width // 2, self.top_position + 180),
         ]
         align_center = TextAlignment.CENTER
         self._menu_texts = [

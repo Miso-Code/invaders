@@ -1,4 +1,6 @@
 {
+    "sound": "assets/snd/game_start.ogg",
+    "icon": "assets/img/invaders_level_flag.png",
     "enemies_organization": [
         {
             "type": "enemy_1",

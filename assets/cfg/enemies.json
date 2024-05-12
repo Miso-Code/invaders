@@ -1,4 +1,19 @@
 {
+  "explosion": {
+    "image": "assets/img/invaders_enemy_explosion.png",
+    "sound": "assets/snd/enemy_die.ogg",
+    "animations": {
+      "number_frames": 4,
+      "list": [
+        {
+          "name": "EXPLODE",
+          "start": 0,
+          "end": 7,
+          "framerate": 16
+        }
+      ]
+    }
+  },
   "enemy_1": {
     "image": "assets/img/invaders_enemy_01.png",
     "animations": {
@@ -13,7 +28,7 @@
       ]
     },
     "chasing_speed": 20,
-    "points": 10,
+    "points": 30,
     "bullet": {
       "number": 1,
       "size": {
@@ -42,6 +57,7 @@
       ]
     },
     "chasing_speed": 20,
+    "points": 80,
     "bullet": {
       "number": 2,
       "size": {
@@ -70,6 +86,7 @@
       ]
     },
     "chasing_speed": 20,
+    "points": 100,
     "bullet": {
       "number": 3,
       "size": {
@@ -87,6 +104,7 @@
   "enemy_4": {
     "image": "assets/img/invaders_enemy_04.png",
     "chasing_speed": 20,
+    "points": 120,
     "bullet": {
       "number": 4,
       "size": {

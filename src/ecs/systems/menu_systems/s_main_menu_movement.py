@@ -16,7 +16,7 @@ def system_main_menu_movement(world: esper.World, delta_time, limit):
 
     if not any_touches_limit:
         for entity, (c_speed, c_transform, c_surface, c_metadata) in components:
-            if c_metadata.scene == "main_menu":
+            if hasattr(c_metadata, "scene") and c_metadata.scene == "main_menu":
                 if c_transform.position.y <= limit:
                     any_touches_limit = True
                     break

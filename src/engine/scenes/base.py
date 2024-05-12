@@ -4,7 +4,6 @@ import esper
 import src.engine.game_engine
 from src.create.prefabs import create_stars
 from src.ecs.components.c_input_command import CInputCommand
-from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_star_blink import system_blink
 from src.ecs.systems.s_stars_movement import system_stars_movement
@@ -15,6 +14,7 @@ class Scene:
         self.ecs_world = esper.World()
         self._game_engine: src.engine.game_engine.GameEngine = game_engine
         self.screen_rect = self._game_engine.screen.get_rect()
+        self.top_position = 20
 
     def do_process_events(self, event: pygame.event):
         pass

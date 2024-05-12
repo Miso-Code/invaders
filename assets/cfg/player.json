@@ -1,17 +1,35 @@
 {
   "image": "assets/img/invaders_char.png",
+  "life_icon": "assets/img/invaders_life.png",
   "speed": 100,
+  "life": 6,
+  "respawn_time": 3,
   "bullet": {
     "size": {
       "width": 1,
       "height": 4
     },
-    "speed": 300,
+    "speed": 500,
     "color": {
       "r": 230,
       "g": 100,
       "b": 30
     },
     "sound": "assets/snd/player_shoot.ogg"
+  },
+  "explosion": {
+    "image": "assets/img/invaders_player_explosion.png",
+    "sound": "assets/snd/player_die.ogg",
+    "animations": {
+      "number_frames": 4,
+      "list": [
+        {
+          "name": "EXPLODE",
+          "start": 0,
+          "end": 7,
+          "framerate": 16
+        }
+      ]
+    }
   }
 }
