@@ -205,12 +205,14 @@ def create_inputs(world: esper.World):
     right_input = world.create_entity()
     a_input = world.create_entity()
     d_input = world.create_entity()
+    p_input = world.create_entity()
 
     world.add_component(space_input, CInputCommand("PLAYER_FIRE", engine.K_SPACE))
     world.add_component(left_input, CInputCommand("PLAYER_LEFT", engine.K_LEFT))
     world.add_component(a_input, CInputCommand("PLAYER_LEFT", engine.K_a))
     world.add_component(right_input, CInputCommand("PLAYER_RIGHT", engine.K_RIGHT))
     world.add_component(d_input, CInputCommand("PLAYER_RIGHT", engine.K_d))
+    world.add_component(p_input, CInputCommand("PAUSE", engine.K_p))
 
 
 def create_main_menu_inputs(world: esper.World):

@@ -6,6 +6,7 @@ from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
+from src.ecs.systems.menu_systems import s_main_menu_movement
 from src.ecs.systems.menu_systems.s_accelerate_menu_position import system_accelerate_menu_position
 from src.ecs.systems.menu_systems.s_main_menu_movement import system_main_menu_movement
 from src.ecs.systems.menu_systems.s_menu_inputs import system_menu_inputs
@@ -26,14 +27,14 @@ class MenuScene(Scene):
         super().__init__(game_engine)
         self.top_position = self._game_engine.screen.get_height() + self.TOP_LIMIT
         self._interface_cfg = game_engine.interface_cfg
-        self._init_texts()
         self._ready_to_start = False
 
     def _init_texts(self):
+        self._check_score()
         first_text = "1UP"
         second_text = "HI-SCORE"
-        third_text = "00"
-        fourth_text = str(self._game_engine.interface_cfg.high_score_max_value)
+        third_text = self._score
+        fourth_text = self._high_score
 
         fifth_text = "Press SPACE to start the game"
 
@@ -65,8 +66,17 @@ class MenuScene(Scene):
             (fifth_text, self._interface_cfg.normal_font_size, title_color, positions[4], self._interface_cfg, align_center, CBlink(1)),
         ]
 
+    def _check_score(self):
+        self._score = f"{self._game_engine.score_service.score:02}"
+        if self._game_engine.score_service.high_score == 0:
+            self._high_score = f"{self._game_engine.interface_cfg.high_score_max_value}"
+        else:
+            self._high_score = f"{self._game_engine.score_service.high_score}"
+
     def do_create(self):
         super().do_create()
+        self._init_texts()
+        s_main_menu_movement.any_touches_limit = False
         create_main_menu_inputs(self.ecs_world)
         for text in self._menu_texts:
             create_text(self.ecs_world, *text, metadata=CMetadata({"scene": "main_menu", "offset": text[3].y - self.top_position}))
@@ -91,4 +101,9 @@ class MenuScene(Scene):
                 system_accelerate_menu_position(self.ecs_world, self.TOP_LIMIT)
                 self._ready_to_start = True
             else:
+                self._reset_scene_properties()
                 self.switch_scene(self.next_scene)
+
+    def _reset_scene_properties(self):
+        self._ready_to_start = False
+        self.top_position = self._game_engine.screen.get_height() + self.TOP_LIMIT

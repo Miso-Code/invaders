@@ -2,7 +2,7 @@
   "image": "assets/img/invaders_char.png",
   "life_icon": "assets/img/invaders_life.png",
   "speed": 100,
-  "life": 6,
+  "life": 3,
   "respawn_time": 3,
   "bullet": {
     "size": {

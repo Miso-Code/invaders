@@ -7,13 +7,9 @@ FILE_PATH_MAP = {
     "level_cfg": "./assets/cfg/level.json",
     "enemies_cfg": "./assets/cfg/enemies.json",
     "player_cfg": "./assets/cfg/player.json",
-    "bullet_cfg": "./assets/cfg/bullet.json",
-    "explosion_cfg": "./assets/cfg/explosion.json",
     "interface_cfg": "./assets/cfg/interface.json",
     "star_field_cfg": "./assets/cfg/starfield.json",
     "music_cfg": "./assets/cfg/music.json",
-    "explosion": "./assets/cfg/enemy_explosion.json",
-    "player_explosion_cfg": "./assets/cfg/player_explosion.json",
 }
 
 

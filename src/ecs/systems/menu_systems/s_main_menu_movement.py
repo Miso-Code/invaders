@@ -3,7 +3,6 @@ from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
-from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.engine.constants import BORDER_SIZE
 
 border = BORDER_SIZE

@@ -1,5 +1,7 @@
 {
     "sound": "assets/snd/game_start.ogg",
+    "game_over_sound": "assets/snd/game_over.ogg",
+    "pause_sound": "assets/snd/game_paused.ogg",
     "icon": "assets/img/invaders_level_flag.png",
     "enemies_organization": [
         {
