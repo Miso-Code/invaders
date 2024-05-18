@@ -1,6 +1,8 @@
 import random
 
 import esper
+from src.constants import EnemyChasingStatus
+from src.constants import MAX_ENEMIES_PER_ROW
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_input_command import CInputCommand
@@ -14,7 +16,6 @@ from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.components.tags.c_tag_player_bullet import CTagPlayerBullet
 from src.ecs.components.tags.c_tag_star import CTagStar
-from src.engine.constants import MAX_ENEMIES_PER_ROW
 from src.engine.services.service_locator import ServiceLocator
 from src.engine.wrapper import PyGameWrapper
 from src.utils import get_relative_area
@@ -143,7 +144,8 @@ def create_enemies(world: esper.World, level_config, enemy_config, screen):
 
         for enemy_index in range(max_enemies_per_row):
             position = engine.Vector2(x_position + x_offset, y_position)
-            speed = engine.Vector2(enemy.chasing_speed, 0)
+            speed_scalar = enemy.chasing_speed * 0.3
+            speed = engine.Vector2(speed_scalar, speed_scalar)
             tag = CTagEnemy(type=enemies_row.type)
             if not x_initial_offset:
                 x_initial_offset = enemy_size[0] / max_enemies_per_row + initial_offset
@@ -155,8 +157,11 @@ def create_enemies(world: esper.World, level_config, enemy_config, screen):
                     "bullet_cfg": enemy.bullet,
                     "chasing_speed": enemy.chasing_speed,
                     "is_chasing": False,
-                    "is_killed": False,
                     "points": enemy.points,
+                    "ghost_position": [position.x, position.y],
+                    "chasing_data": {
+                        "chasing_status": EnemyChasingStatus.STOP,
+                    },
                 },
             )
             if hasattr(enemy, "animations") and loops_to_wait <= enemy_index < (enemies_in_current_row + loops_to_wait):
@@ -185,7 +190,6 @@ def create_enemy_bullet(world, enemy_bullet_config, enemy_position, enemy_surfac
 
 
 def create_explosion(world, position, surface, config):
-    # ToDo: Check explosion animation
     explosion_size = get_relative_area(surface.area, position.position).size
     explosion_position = engine.Vector2(position.position.x + surface.area.width / 2 - explosion_size[0] / 2, position.position.y + surface.area.height / 2 - explosion_size[1] / 2)
     explosion_surface = image_service.get(config.image)

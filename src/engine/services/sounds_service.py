@@ -11,8 +11,7 @@ class SoundsService:
             return
         if path not in self._sounds:
             self._sounds[path] = pygame.mixer.Sound(path)
-        if not self.is_playing(path):
-            self._sounds[path].play()
+        self._sounds[path].play()
 
     def play_music(self, path):
         if path not in self._sounds:

@@ -18,14 +18,17 @@ from src.ecs.components.tags.c_tag_player_bullet import CTagPlayerBullet
 from src.ecs.systems.game_systems.s_bullet_movement import system_enemy_bullet_movement
 from src.ecs.systems.game_systems.s_bullet_movement import system_player_bullet_movement
 from src.ecs.systems.game_systems.s_draw_life import system_remove_life_icon
+from src.ecs.systems.game_systems.s_enemies_chaser_selector import system_enemy_chasers_selector
 from src.ecs.systems.game_systems.s_enemies_movement import system_enemies_movement
 from src.ecs.systems.game_systems.s_enemy_bullet_player_collision import system_enemy_bullet_player_collision
+from src.ecs.systems.game_systems.s_enemy_chase import system_enemy_chase
 from src.ecs.systems.game_systems.s_enemy_shoot import system_enemy_shoot
 from src.ecs.systems.game_systems.s_explosions_removal import system_explosion_removal
 from src.ecs.systems.game_systems.s_input_player import system_input_player
 from src.ecs.systems.game_systems.s_player_bullet_enemy_collision import system_player_bullet_enemy_collision
 from src.ecs.systems.game_systems.s_player_respawn import system_player_respawn
 from src.ecs.systems.game_systems.s_remove_texts import system_remove_texts
+from src.ecs.systems.game_systems.s_rotate_enemy import system_rotate_enemy
 from src.ecs.systems.game_systems.s_update_game_properties import system_update_game_properties
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_movement import system_movement_player
@@ -160,15 +163,25 @@ class GameScene(Scene):
             if not self._player_metadata.is_respawning:
                 system_movement_player(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
                 self._score += system_player_bullet_enemy_collision(self.ecs_world, self._game_engine.enemies_cfg.explosion)
+                # system_rotate_enemy(self.ecs_world, self._game_engine.delta_time, self._player_transform.position)
                 system_enemy_shoot(self.ecs_world)
                 system_enemy_bullet_player_collision(self.ecs_world, self._game_engine.player_cfg.explosion)
             system_player_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
             system_enemy_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
             system_enemies_movement(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
+            system_enemy_chase(
+                self.ecs_world,
+                self._game_engine.delta_time,
+                self._player_transform,
+                self._game_engine.screen,
+                self._game_engine.enemies_cfg,
+                not self._player_metadata.is_respawning,
+            )
             system_animation(self.ecs_world, self._game_engine.delta_time)
             system_explosion_removal(self.ecs_world)
             system_player_respawn(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen, self._game_engine.player_cfg)
             system_remove_life_icon(self.ecs_world, self._lives)
+
             self._update_player_scene_properties()
             self._level_up()
             self._game_over()
