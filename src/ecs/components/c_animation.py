@@ -5,6 +5,7 @@ class CAnimation:
         self.current_animation = 0
         self.current_animation_time = 0
         self.current_frame = self.animation_list[self.current_animation].start
+        self.is_enabled = True
 
 
 class CAnimationData:

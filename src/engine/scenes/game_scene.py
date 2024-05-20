@@ -1,3 +1,6 @@
+from src.constants import BLINK
+from src.constants import PlayerMovement
+from src.constants import TIMER
 from src.create.prefab_creator_interface import create_life_icon
 from src.create.prefab_creator_interface import create_text
 from src.create.prefab_creator_interface import TextAlignment
@@ -22,20 +25,18 @@ from src.ecs.systems.game_systems.s_enemies_chaser_selector import system_enemy_
 from src.ecs.systems.game_systems.s_enemies_movement import system_enemies_movement
 from src.ecs.systems.game_systems.s_enemy_bullet_player_collision import system_enemy_bullet_player_collision
 from src.ecs.systems.game_systems.s_enemy_chase import system_enemy_chase
+from src.ecs.systems.game_systems.s_enemy_collision import system_enemy_collision
 from src.ecs.systems.game_systems.s_enemy_shoot import system_enemy_shoot
+from src.ecs.systems.game_systems.s_enemy_state import system_enemy_state
 from src.ecs.systems.game_systems.s_explosions_removal import system_explosion_removal
 from src.ecs.systems.game_systems.s_input_player import system_input_player
 from src.ecs.systems.game_systems.s_player_bullet_enemy_collision import system_player_bullet_enemy_collision
 from src.ecs.systems.game_systems.s_player_respawn import system_player_respawn
 from src.ecs.systems.game_systems.s_remove_texts import system_remove_texts
-from src.ecs.systems.game_systems.s_rotate_enemy import system_rotate_enemy
 from src.ecs.systems.game_systems.s_update_game_properties import system_update_game_properties
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_movement import system_movement_player
 from src.engine.scenes.base import Scene
-
-TIMER = 3  # seconds
-BLINK = 1  # seconds
 
 
 class GameScene(Scene):
@@ -43,7 +44,6 @@ class GameScene(Scene):
         super().__init__(game_engine)
         self.next_scene = "main_menu"
         self._player_metadata = None
-        self._player_speed = None
         self._player_transform = None
         self._player_surface = None
         self._all_enemies = None
@@ -70,7 +70,6 @@ class GameScene(Scene):
         player_entity = create_player(self.ecs_world, self._game_engine.player_cfg, self._game_engine.screen)
         self._player_surface = self.ecs_world.component_for_entity(player_entity, CSurface)
         self._player_transform = self.ecs_world.component_for_entity(player_entity, CTransform)
-        self._player_speed = self.ecs_world.component_for_entity(player_entity, CSpeed)
         self._player_metadata = self.ecs_world.component_for_entity(player_entity, CMetadata)
         self._game_engine.sound_service.play(self._game_engine.level_cfg.sound)
         self._render_texts()
@@ -161,12 +160,13 @@ class GameScene(Scene):
         if not self._is_paused:
             system_remove_texts(self.ecs_world)
             if not self._player_metadata.is_respawning:
-                system_movement_player(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
+                system_movement_player(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen, self._game_engine.player_cfg)
                 self._score += system_player_bullet_enemy_collision(self.ecs_world, self._game_engine.enemies_cfg.explosion)
-                # system_rotate_enemy(self.ecs_world, self._game_engine.delta_time, self._player_transform.position)
                 system_enemy_shoot(self.ecs_world)
                 system_enemy_bullet_player_collision(self.ecs_world, self._game_engine.player_cfg.explosion)
+            system_enemy_state(self.ecs_world, self._game_engine.enemies_cfg)
             system_player_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
+            system_enemy_collision(self.ecs_world, self._game_engine.delta_time)
             system_enemy_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
             system_enemies_movement(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
             system_enemy_chase(
@@ -218,18 +218,25 @@ class GameScene(Scene):
             system_input_player(self.ecs_world, event, self._do_action)
 
     def _do_action(self, command):
-        player_speed = self._game_engine.player_cfg.speed
-        if command.name == "PLAYER_RIGHT":
-            if command.phase == CommandPhase.START:
-                self._player_speed.speed.x += player_speed
-            elif command.phase == CommandPhase.END:
-                self._player_speed.speed.x -= player_speed
-        elif command.name == "PLAYER_LEFT":
-            if command.phase == CommandPhase.START:
-                self._player_speed.speed.x -= player_speed
-            elif command.phase == CommandPhase.END:
-                self._player_speed.speed.x += player_speed
-        elif command.name == "PLAYER_FIRE":
+        if (
+            self._player_metadata.player_state == PlayerMovement.RIGHT
+            and command.name == "PLAYER_LEFT"
+            or self._player_metadata.player_state == PlayerMovement.LEFT
+            and command.name == "PLAYER_RIGHT"
+        ):
+            self._player_metadata.player_state = PlayerMovement.STOP
+        else:
+            if command.name == "PLAYER_RIGHT":
+                if command.phase == CommandPhase.START:
+                    self._player_metadata.player_state = PlayerMovement.RIGHT if self._player_metadata.player_state != PlayerMovement.LEFT else PlayerMovement.STOP
+                elif command.phase == CommandPhase.END:
+                    self._player_metadata.player_state = PlayerMovement.LEFT if self._player_metadata.player_state == PlayerMovement.STOP else PlayerMovement.STOP
+            if command.name == "PLAYER_LEFT":
+                if command.phase == CommandPhase.START:
+                    self._player_metadata.player_state = PlayerMovement.LEFT if self._player_metadata.player_state != PlayerMovement.RIGHT else PlayerMovement.STOP
+                elif command.phase == CommandPhase.END:
+                    self._player_metadata.player_state = PlayerMovement.RIGHT if self._player_metadata.player_state == PlayerMovement.STOP else PlayerMovement.STOP
+        if command.name == "PLAYER_FIRE":
             if command.phase == CommandPhase.START:
                 # check if there is not a bullet already on the screen
                 bullets = self.ecs_world.get_components(CSurface, CTagPlayerBullet)

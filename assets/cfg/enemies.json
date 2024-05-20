@@ -17,6 +17,7 @@
   "launch_sound": "assets/snd/enemy_launch.ogg",
   "enemy_1": {
     "image": "assets/img/invaders_enemy_01.png",
+    "pivot_image": "assets/img/pivot_imgs/invaders_enemy_01_pivot.png",
     "animations": {
       "number_frames": 5,
       "list": [
@@ -46,6 +47,7 @@
   },
   "enemy_2": {
     "image": "assets/img/invaders_enemy_02.png",
+    "pivot_image": "assets/img/pivot_imgs/invaders_enemy_02_pivot.png",
     "animations": {
       "number_frames": 5,
       "list": [
@@ -75,6 +77,7 @@
   },
   "enemy_3": {
     "image": "assets/img/invaders_enemy_03.png",
+    "pivot_image": "assets/img/pivot_imgs/invaders_enemy_03_pivot.png",
     "animations": {
       "number_frames": 5,
       "list": [
@@ -104,6 +107,7 @@
   },
   "enemy_4": {
     "image": "assets/img/invaders_enemy_04.png",
+    "pivot_image": "assets/img/pivot_imgs/invaders_enemy_04_pivot.png",
     "chasing_speed": 50,
     "points": 120,
     "bullet": {

@@ -3,6 +3,7 @@ import random
 import esper
 from src.constants import EnemyChasingStatus
 from src.constants import MAX_ENEMIES_PER_ROW
+from src.constants import PlayerMovement
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_input_command import CInputCommand
@@ -89,6 +90,7 @@ def create_player(world, player_config, screen):
             "respawn_timer": player_config.respawn_time,
             "lives": player_config.life,
             "score": 0,
+            "player_state": PlayerMovement.STOP,
         },
     )
     return create_sprite(world, player_surface, player_position, speed=CSpeed(player_speed), tag=CTagPlayer(), metadata=player_metadata)
@@ -161,6 +163,7 @@ def create_enemies(world: esper.World, level_config, enemy_config, screen):
                     "ghost_position": [position.x, position.y],
                     "chasing_data": {
                         "chasing_status": EnemyChasingStatus.STOP,
+                        "sync_animation": False,
                     },
                 },
             )

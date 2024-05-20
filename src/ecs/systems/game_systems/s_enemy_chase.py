@@ -15,26 +15,20 @@ sound_service = ServiceLocator.sounds_service
 def system_enemy_jump(delta_time: float, enemy_transform, enemy_metadata, player_position, screen) -> None:
     stop_jump = enemy_metadata.chasing_data.get("stop_jump", False)
     chase_speed = enemy_metadata.chasing_speed
-    trajectory_angle = enemy_metadata.chasing_data.get("trajectory_angle", None)
-    if trajectory_angle is None:
-        trajectory_angle = math.atan2(player_position.y - enemy_transform.position.y, player_position.x - enemy_transform.position.x)
-        trajectory_angle = math.degrees(trajectory_angle)
-        enemy_metadata.chasing_data["trajectory_angle"] = trajectory_angle
 
-    enemy_transform.rotation = trajectory_angle
     if enemy_transform.position.x < player_position.x:
         direction = 1
     else:
         direction = -1
     enemy_transform.position.x += (chase_speed * 0.5 + (abs(enemy_transform.position.x - player_position.x) * 0.5)) * delta_time * direction
     if not stop_jump:
-        enemy_transform.position.y -= 2 * chase_speed * delta_time
+        min_jump_height = 20
+        enemy_transform.position.y -= (2 * chase_speed + min_jump_height) * delta_time
         enemy_metadata.chasing_data["stop_jump"] = False
 
         if enemy_transform.position.y < enemy_metadata.ghost_position[1] - 30:
             enemy_metadata.chasing_data["stop_jump"] = True
     else:
-        # fall to the ground
         enemy_transform.position.y += chase_speed * delta_time
         if enemy_transform.position.y >= screen.height:
             enemy_transform.position.y = 0
@@ -42,19 +36,22 @@ def system_enemy_jump(delta_time: float, enemy_transform, enemy_metadata, player
 
 
 def system_enemy_return(delta_time: float, enemy_transform, enemy_metadata, player_position, screen) -> None:
-    # get a trajectory to return to the ghost position
     chase_speed = enemy_metadata.chasing_speed
-    # move the enemy to the ghost position
     if enemy_transform.position.x < enemy_metadata.ghost_position[0]:
         direction = 1
     else:
         direction = -1
-    enemy_transform.position.x += (chase_speed + abs(enemy_transform.position.x - enemy_metadata.ghost_position[0])) * direction * delta_time * 0.6
+    enemy_transform.position.x += (chase_speed + abs(enemy_transform.position.x - enemy_metadata.ghost_position[0])) * direction * delta_time * 0.7
     enemy_transform.position.y += chase_speed * delta_time * 0.4
-    offset = 2
+    offset = 1
     x_diff = abs(enemy_transform.position.x - enemy_metadata.ghost_position[0])
     y_diff = abs(enemy_transform.position.y - enemy_metadata.ghost_position[1])
-    if x_diff < offset and y_diff < offset:
+
+    enemy_metadata.chasing_data["sprite_is_rotated"] = False
+
+    # ToDo: Fix bug. Some enemies are not returning to the ghost position
+
+    if x_diff <= offset and y_diff <= offset:
         enemy_transform.position.x = enemy_metadata.ghost_position[0]
         enemy_transform.position.y = enemy_metadata.ghost_position[1]
         enemy_metadata.is_chasing = False
