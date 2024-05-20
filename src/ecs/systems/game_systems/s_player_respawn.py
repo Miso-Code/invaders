@@ -11,7 +11,6 @@ def system_player_respawn(world, delta_time, screen, player_cfg):
                 c_metadata.is_killed = False
                 c_metadata.is_respawning = False
                 c_metadata.respawn_timer = player_cfg.respawn_time
-                print("Respawning player", c_metadata.lives, "lives left", c_metadata.respawn_timer)
                 screen_width, screen_height = screen.get_size()
                 player_size = c_surface.surface.get_size()
                 c_transform.position.x = screen_width / 2 - (player_size[0] / 2)

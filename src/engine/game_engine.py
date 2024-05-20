@@ -11,6 +11,7 @@ class GameEngine:
     sound_service = ServiceLocator.sounds_service
     image_service = ServiceLocator.images_service
     text_service = ServiceLocator.text_service
+    score_service = ServiceLocator.score_service
 
     def __init__(self) -> None:
         self._current_scene = None
@@ -48,8 +49,6 @@ class GameEngine:
         self._scenes = {
             "main_menu": MenuScene(self),
             "game": GameScene(self),
-            # "game_over": GameOverScene(self),
-            # "win": WinScene(self),
         }
         self._current_scene = None
         self._scene_name_to_switch = None

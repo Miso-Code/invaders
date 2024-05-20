@@ -14,10 +14,13 @@ max_bullets_on_screen = 5
 
 def system_enemy_shoot(world: esper.World) -> None:
     components = world.get_components(CTransform, CSurface, CMetadata, CTagEnemy)
-    random_threshold = 0.98
+    random_threshold = 0.99
     bullets_in_screen = len(world.get_component(CTagEnemyBullet))
     for entity, (c_transform, c_surface, c_metadata, _) in components:
         random_number = random.random()
+        if c_metadata.is_chasing:
+            random_threshold = 0.80
+            bullets_in_screen -= 1
         if random_number > random_threshold and bullets_in_screen < max_bullets_on_screen:
             for _ in range(c_metadata.bullet_cfg.number):
                 create_enemy_bullet(world, c_metadata.bullet_cfg, c_transform, c_surface)

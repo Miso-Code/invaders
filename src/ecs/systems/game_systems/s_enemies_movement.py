@@ -1,11 +1,10 @@
 import esper
-from src.ecs.components.c_enemy_metadata import CEnemyMetadata
+from src.constants import BORDER_SIZE
 from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
-from src.engine.constants import BORDER_SIZE
 
 border = BORDER_SIZE * 3
 speed_direction = -1
@@ -27,6 +26,9 @@ def system_enemies_movement(world: esper.World, delta_time: float, screen) -> No
     if most_right_enemy is not None and most_right_enemy.x > screen.get_width() - border:
         speed_direction = -1
 
-    components = world.get_components(CTransform, CTagEnemy, CSpeed)
-    for _, (c_transform, _, c_speed) in components:
-        c_transform.position.x += c_speed.speed.x * delta_time * speed_direction
+    components = world.get_components(CTransform, CSpeed, CMetadata, CTagEnemy)
+    for _, (c_transform, c_speed, c_metadata, _) in components:
+        position = c_speed.speed.x * delta_time * speed_direction
+        if not c_metadata.is_chasing:
+            c_transform.position.x += position
+        c_metadata.ghost_position[0] += position

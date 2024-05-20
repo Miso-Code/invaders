@@ -2,19 +2,20 @@ import json
 
 import pygame
 
+from src.ecs.components.c_animation import CAnimation
+from src.engine.wrapper import PyGameWrapper
+
 FILE_PATH_MAP = {
     "window_cfg": "./assets/cfg/window.json",
     "level_cfg": "./assets/cfg/level.json",
     "enemies_cfg": "./assets/cfg/enemies.json",
     "player_cfg": "./assets/cfg/player.json",
-    "bullet_cfg": "./assets/cfg/bullet.json",
-    "explosion_cfg": "./assets/cfg/explosion.json",
     "interface_cfg": "./assets/cfg/interface.json",
     "star_field_cfg": "./assets/cfg/starfield.json",
     "music_cfg": "./assets/cfg/music.json",
-    "explosion": "./assets/cfg/enemy_explosion.json",
-    "player_explosion_cfg": "./assets/cfg/player_explosion.json",
 }
+
+engine = PyGameWrapper().engine
 
 
 class JSONObject(object):
@@ -40,3 +41,16 @@ def get_relative_area(area: pygame.Rect, pos_topleft: pygame.Vector2):
     new_rect = area.copy()
     new_rect.topleft = pos_topleft
     return new_rect
+
+
+def rotate_sprite(sprite_image, angle):
+    return engine.transform.rotate(sprite_image, angle)
+
+
+def set_animation(animation: CAnimation, num_anim: int):
+    if animation.current_animation == num_anim:
+        return
+    else:
+        animation.current_animation = num_anim
+        animation.current_animation_time = 0
+        animation.current_frame = animation.animation_list[animation.current_animation].start

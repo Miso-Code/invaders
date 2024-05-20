@@ -1,27 +1,38 @@
+from src.constants import BLINK
+from src.constants import PlayerMovement
+from src.constants import TIMER
 from src.create.prefab_creator_interface import create_life_icon
 from src.create.prefab_creator_interface import create_text
+from src.create.prefab_creator_interface import TextAlignment
 from src.create.prefabs import create_enemies
 from src.create.prefabs import create_inputs
 from src.create.prefabs import create_player
 from src.create.prefabs import create_player_bullet
 from src.create.prefabs import create_sprite
+from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_input_command import CommandPhase
 from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.components.tags.c_tag_player_bullet import CTagPlayerBullet
 from src.ecs.systems.game_systems.s_bullet_movement import system_enemy_bullet_movement
 from src.ecs.systems.game_systems.s_bullet_movement import system_player_bullet_movement
 from src.ecs.systems.game_systems.s_draw_life import system_remove_life_icon
+from src.ecs.systems.game_systems.s_enemies_chaser_selector import system_enemy_chasers_selector
 from src.ecs.systems.game_systems.s_enemies_movement import system_enemies_movement
 from src.ecs.systems.game_systems.s_enemy_bullet_player_collision import system_enemy_bullet_player_collision
+from src.ecs.systems.game_systems.s_enemy_chase import system_enemy_chase
+from src.ecs.systems.game_systems.s_enemy_collision import system_enemy_collision
 from src.ecs.systems.game_systems.s_enemy_shoot import system_enemy_shoot
+from src.ecs.systems.game_systems.s_enemy_state import system_enemy_state
 from src.ecs.systems.game_systems.s_explosions_removal import system_explosion_removal
 from src.ecs.systems.game_systems.s_input_player import system_input_player
 from src.ecs.systems.game_systems.s_player_bullet_enemy_collision import system_player_bullet_enemy_collision
 from src.ecs.systems.game_systems.s_player_respawn import system_player_respawn
+from src.ecs.systems.game_systems.s_remove_texts import system_remove_texts
 from src.ecs.systems.game_systems.s_update_game_properties import system_update_game_properties
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_movement import system_movement_player
@@ -31,9 +42,8 @@ from src.engine.scenes.base import Scene
 class GameScene(Scene):
     def __init__(self, game_engine):
         super().__init__(game_engine)
-        self.next_scene = "game_over"
+        self.next_scene = "main_menu"
         self._player_metadata = None
-        self._player_speed = None
         self._player_transform = None
         self._player_surface = None
         self._all_enemies = None
@@ -41,16 +51,25 @@ class GameScene(Scene):
         self._score = 0
         self._lives = self._game_engine.player_cfg.life
         self._level = 1
+        self._is_level_up = False
+        self._is_game_over = False
+        self._game_over_timer = TIMER
+        self._level_up_sound_played = False
+        self._level_up_timer = TIMER
+        self._game_over_sound_played = False
+        self._is_paused = False
+        self._pause_text = None
+        self._is_paused_sound_played = False
         self._init_font_config()
 
     def do_create(self):
+        self._reset_game_properties()
         super().do_create()
         create_inputs(self.ecs_world)
         self._all_enemies = create_enemies(self.ecs_world, self._game_engine.level_cfg, self._game_engine.enemies_cfg, self._game_engine.screen)
         player_entity = create_player(self.ecs_world, self._game_engine.player_cfg, self._game_engine.screen)
         self._player_surface = self.ecs_world.component_for_entity(player_entity, CSurface)
         self._player_transform = self.ecs_world.component_for_entity(player_entity, CTransform)
-        self._player_speed = self.ecs_world.component_for_entity(player_entity, CSpeed)
         self._player_metadata = self.ecs_world.component_for_entity(player_entity, CMetadata)
         self._game_engine.sound_service.play(self._game_engine.level_cfg.sound)
         self._render_texts()
@@ -89,7 +108,10 @@ class GameScene(Scene):
         third_text = f"{self._score:06}"
         fourth_text = f"{self._high_score}"
         fifth_text = f"{self._level:02}"
+        sixth_text = "GAME START"
+
         screen_width = self._game_engine.screen.get_width()
+        screen_height = self._game_engine.screen.get_height()
 
         positions = [
             self._game_engine.engine.Vector2(screen_width // 6, self.top_position),
@@ -97,6 +119,7 @@ class GameScene(Scene):
             self._game_engine.engine.Vector2(3 * screen_width // 14, self.top_position + 10),
             self._game_engine.engine.Vector2(5 * screen_width // 12, self.top_position + 10),
             self._game_engine.engine.Vector2(3 * screen_width // 4, self.top_position + 10),
+            self._game_engine.engine.Vector2(screen_width // 2, screen_height // 2),
         ]
         menu_texts = [
             (first_text, self._title_font_size, self._title_color, positions[0], self._game_engine.interface_cfg, CMetadata({"type": "text"})),
@@ -125,33 +148,59 @@ class GameScene(Scene):
                 self._game_engine.interface_cfg,
                 CMetadata({"type": "text", "is_editable": True, "field": "lives"}),
             ),
+            (sixth_text, self._title_font_size, self._normal_color, positions[5], self._game_engine.interface_cfg, CMetadata({"type": "text", "is_removable": True})),
         ]
-        for text in menu_texts:
+        for text in menu_texts[:-1]:
             metadata = text[-1]
             create_text(self.ecs_world, *text[:-1], metadata=metadata)
 
+        create_text(self.ecs_world, *menu_texts[-1][:-1], metadata=menu_texts[-1][-1], alignment=TextAlignment.CENTER)
+
     def do_update(self, delta_time: float):
-        if not self._player_metadata.is_respawning:
-            system_movement_player(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
-            self._score += system_player_bullet_enemy_collision(self.ecs_world, self._game_engine.enemies_cfg.explosion)
-            system_enemy_shoot(self.ecs_world)
-            system_enemy_bullet_player_collision(self.ecs_world, self._game_engine.player_cfg.explosion)
-        system_player_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
-        system_enemy_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
-        system_enemies_movement(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
-        system_animation(self.ecs_world, self._game_engine.delta_time)
-        system_explosion_removal(self.ecs_world)
-        system_player_respawn(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen, self._game_engine.player_cfg)
-        system_remove_life_icon(self.ecs_world, self._lives)
-        self._update_player_scene_properties()
+        if not self._is_paused:
+            system_remove_texts(self.ecs_world)
+            if not self._player_metadata.is_respawning:
+                system_movement_player(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen, self._game_engine.player_cfg)
+                self._score += system_player_bullet_enemy_collision(self.ecs_world, self._game_engine.enemies_cfg.explosion)
+                system_enemy_shoot(self.ecs_world)
+                system_enemy_bullet_player_collision(self.ecs_world, self._game_engine.player_cfg.explosion)
+            system_enemy_state(self.ecs_world, self._game_engine.enemies_cfg)
+            system_player_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
+            system_enemy_collision(self.ecs_world, self._game_engine.delta_time)
+            system_enemy_bullet_movement(self.ecs_world, self._game_engine.screen, self._game_engine.delta_time)
+            system_enemies_movement(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen)
+            system_enemy_chase(
+                self.ecs_world,
+                self._game_engine.delta_time,
+                self._player_transform,
+                self._game_engine.screen,
+                self._game_engine.enemies_cfg,
+                not self._player_metadata.is_respawning,
+            )
+            system_animation(self.ecs_world, self._game_engine.delta_time)
+            system_explosion_removal(self.ecs_world)
+            system_player_respawn(self.ecs_world, self._game_engine.delta_time, self._game_engine.screen, self._game_engine.player_cfg)
+            system_remove_life_icon(self.ecs_world, self._lives)
+
+            self._update_player_scene_properties()
+            self._level_up()
+            self._game_over()
+        self._pause_game()
 
     def _update_player_scene_properties(self):
         player = self.ecs_world.get_components(CTagPlayer)
         if player:
             player_metadata = self.ecs_world.component_for_entity(player[0][0], CMetadata)
             self._lives = player_metadata.lives
+            self._game_engine.score_service.score = self._score
+            self._game_engine.score_service.high_score = self._high_score
             if self._score > self._high_score:
                 self._high_score = self._score
+            if self._lives == 0:
+                self._is_game_over = True
+            enemies = self.ecs_world.get_components(CTagEnemy)
+            if not enemies:
+                self._is_level_up = True
 
             fields = [
                 ["score", f"{self._score:02}", self._high_score_font_size, self._normal_color],
@@ -169,18 +218,25 @@ class GameScene(Scene):
             system_input_player(self.ecs_world, event, self._do_action)
 
     def _do_action(self, command):
-        player_speed = self._game_engine.player_cfg.speed
-        if command.name == "PLAYER_RIGHT":
-            if command.phase == CommandPhase.START:
-                self._player_speed.speed.x += player_speed
-            elif command.phase == CommandPhase.END:
-                self._player_speed.speed.x -= player_speed
-        elif command.name == "PLAYER_LEFT":
-            if command.phase == CommandPhase.START:
-                self._player_speed.speed.x -= player_speed
-            elif command.phase == CommandPhase.END:
-                self._player_speed.speed.x += player_speed
-        elif command.name == "PLAYER_FIRE":
+        if (
+            self._player_metadata.player_state == PlayerMovement.RIGHT
+            and command.name == "PLAYER_LEFT"
+            or self._player_metadata.player_state == PlayerMovement.LEFT
+            and command.name == "PLAYER_RIGHT"
+        ):
+            self._player_metadata.player_state = PlayerMovement.STOP
+        else:
+            if command.name == "PLAYER_RIGHT":
+                if command.phase == CommandPhase.START:
+                    self._player_metadata.player_state = PlayerMovement.RIGHT if self._player_metadata.player_state != PlayerMovement.LEFT else PlayerMovement.STOP
+                elif command.phase == CommandPhase.END:
+                    self._player_metadata.player_state = PlayerMovement.LEFT if self._player_metadata.player_state == PlayerMovement.STOP else PlayerMovement.STOP
+            if command.name == "PLAYER_LEFT":
+                if command.phase == CommandPhase.START:
+                    self._player_metadata.player_state = PlayerMovement.LEFT if self._player_metadata.player_state != PlayerMovement.RIGHT else PlayerMovement.STOP
+                elif command.phase == CommandPhase.END:
+                    self._player_metadata.player_state = PlayerMovement.RIGHT if self._player_metadata.player_state == PlayerMovement.STOP else PlayerMovement.STOP
+        if command.name == "PLAYER_FIRE":
             if command.phase == CommandPhase.START:
                 # check if there is not a bullet already on the screen
                 bullets = self.ecs_world.get_components(CSurface, CTagPlayerBullet)
@@ -190,3 +246,91 @@ class GameScene(Scene):
                     self._game_engine.sound_service.play(self._game_engine.player_cfg.bullet.sound)
             elif command.phase == CommandPhase.END:
                 pass
+        elif command.name == "PAUSE":
+            if command.phase == CommandPhase.START:
+                self._is_paused = not self._is_paused
+            elif command.phase == CommandPhase.END:
+                pass
+
+    def _pause_game(self):
+        if self._is_paused and not self._pause_text:
+            self._game_engine.sound_service.play(self._game_engine.level_cfg.pause_sound)
+            self._pause_text = create_text(
+                self.ecs_world,
+                "PAUSED",
+                self._title_font_size,
+                self._title_color,
+                self._game_engine.engine.Vector2(self._game_engine.screen.get_width() // 2, self._game_engine.screen.get_height() // 2),
+                self._game_engine.interface_cfg,
+                alignment=TextAlignment.CENTER,
+                metadata=CMetadata({"type": "text", "is_removable": True}),
+                blink=CBlink(BLINK),
+            )
+            self._is_paused_sound_played = True
+        elif not self._is_paused:
+            self._pause_text = None
+            self._is_paused_sound_played = False
+
+    def _game_over(self):
+        if self._is_game_over:
+            if not self._game_over_sound_played:
+                self._game_engine.sound_service.play(self._game_engine.level_cfg.game_over_sound)
+                self._game_over_sound_played = True
+            self._game_over_timer -= self._game_engine.delta_time
+            if self._game_over_timer <= 0:
+                self.switch_scene(self.next_scene)
+            else:
+                create_text(
+                    self.ecs_world,
+                    "GAME OVER",
+                    self._title_font_size,
+                    self._normal_color,
+                    self._game_engine.engine.Vector2(self._game_engine.screen.get_width() // 2, self._game_engine.screen.get_height() // 2),
+                    self._game_engine.interface_cfg,
+                    alignment=TextAlignment.CENTER,
+                    metadata=CMetadata({"type": "text", "is_removable": True}),
+                )
+
+    def _level_up(self):
+        if self._is_level_up and not self._is_game_over:
+            self._level_up_timer -= self._game_engine.delta_time
+            create_text(
+                self.ecs_world,
+                "Be ready for the next level!",
+                self._title_font_size,
+                self._title_color,
+                self._game_engine.engine.Vector2(self._game_engine.screen.get_width() // 2, self._game_engine.screen.get_height() // 2),
+                self._game_engine.interface_cfg,
+                alignment=TextAlignment.CENTER,
+                metadata=CMetadata({"type": "text", "is_removable": True}),
+            )
+            if not self._level_up_sound_played:
+                self._game_engine.sound_service.play(self._game_engine.level_cfg.sound)
+                self._level_up_sound_played = True
+            if self._level_up_timer <= 0:
+                system_remove_texts(self.ecs_world)
+                self._level += 1
+                self._is_level_up = False
+                self._level_up_timer = TIMER
+                self._level_up_sound_played = False
+                self._all_enemies = create_enemies(self.ecs_world, self._game_engine.level_cfg, self._game_engine.enemies_cfg, self._game_engine.screen)
+
+    def _reset_game_properties(self):
+        try:
+            if not self._is_level_up:
+                self._is_game_over = False
+                self._game_over_timer = TIMER
+                self._game_over_sound_played = False
+                self._score = 0
+                self._lives = self._game_engine.player_cfg.life
+                self._level = 1
+                self._is_level_up = False
+                self._level_up_timer = TIMER
+                self._level_up_sound_played = False
+                self._game_engine.score_service.score = self._score
+                self._player_metadata.lives = self._lives
+                self._player_metadata.is_respawning = False
+                self._pause_text = None
+                self._is_paused_sound_played = False
+        except:
+            pass

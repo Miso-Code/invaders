@@ -12,12 +12,13 @@ def system_input_player(world: esper.World, event: engine.event.Event, do_action
     components = world.get_component(CInputCommand)
 
     for _, command in components:
-        if event.type == engine.KEYDOWN and event.key == command.key:
-            command.phase = CommandPhase.START
-            do_action(command)
-        elif event.type == engine.KEYUP and event.key == command.key:
-            command.phase = CommandPhase.END
-            do_action(command)
-        elif event.type == engine.KEYDOWN and event.key == engine.K_SPACE:
-            command.phase = CommandPhase.START
-            do_action(command)
+        if event.type == engine.KEYDOWN:
+            if event.key == command.key:
+                command.phase = CommandPhase.START
+                do_action(command)
+                return
+        elif event.type == engine.KEYUP:
+            if event.key == command.key:
+                command.phase = CommandPhase.END
+                do_action(command)
+                return
