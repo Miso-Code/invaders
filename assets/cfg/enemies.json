@@ -9,7 +9,7 @@
           "name": "EXPLODE",
           "start": 0,
           "end": 7,
-          "framerate": 16
+          "framerate": 10
         }
       ]
     }
@@ -25,7 +25,7 @@
           "name": "MOVE",
           "start": 0,
           "end": 5,
-          "framerate": 5
+          "framerate": 2
         }
       ]
     },
@@ -55,7 +55,7 @@
           "name": "MOVE",
           "start": 0,
           "end": 5,
-          "framerate": 5
+          "framerate": 2
         }
       ]
     },
@@ -85,7 +85,7 @@
           "name": "MOVE",
           "start": 1,
           "end": 5,
-          "framerate": 5
+          "framerate": 2
         }
       ]
     },
