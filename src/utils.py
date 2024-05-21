@@ -1,6 +1,5 @@
 import json
-
-import pygame
+import random
 
 from src.ecs.components.c_animation import CAnimation
 from src.engine.wrapper import PyGameWrapper
@@ -37,7 +36,7 @@ def read_json(config_name):
         return JSONObject(data)
 
 
-def get_relative_area(area: pygame.Rect, pos_topleft: pygame.Vector2):
+def get_relative_area(area, pos_topleft):
     new_rect = area.copy()
     new_rect.topleft = pos_topleft
     return new_rect
@@ -54,3 +53,7 @@ def set_animation(animation: CAnimation, num_anim: int):
         animation.current_animation = num_anim
         animation.current_animation_time = 0
         animation.current_frame = animation.animation_list[animation.current_animation].start
+
+
+def randomize_elements(elements):
+    return random.sample(elements, len(elements))

@@ -2,14 +2,14 @@
   "image": "assets/img/invaders_char.png",
   "life_icon": "assets/img/invaders_life.png",
   "speed": 100,
-  "life": 3,
+  "life": 4,
   "respawn_time": 3,
   "bullet": {
     "size": {
       "width": 1,
       "height": 4
     },
-    "speed": 500,
+    "speed": 550,
     "color": {
       "r": 230,
       "g": 100,
@@ -27,7 +27,7 @@
           "name": "EXPLODE",
           "start": 0,
           "end": 7,
-          "framerate": 16
+          "framerate": 5
         }
       ]
     }

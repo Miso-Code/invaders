@@ -4,6 +4,7 @@ from src.create.prefabs import create_main_menu_inputs
 from src.create.prefabs import create_sprite
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_input_command import CommandPhase
 from src.ecs.components.c_metadata import CMetadata
 from src.ecs.components.c_speed import CSpeed
 from src.ecs.systems.menu_systems import s_main_menu_movement
@@ -36,7 +37,7 @@ class MenuScene(Scene):
         third_text = self._score
         fourth_text = self._high_score
 
-        fifth_text = "Press SPACE to start the game"
+        fifth_text = "Press SPACE or Z to start the game"
 
         title_text_color = self._game_engine.interface_cfg.title_text_color
         normal_text_color = self._game_engine.interface_cfg.normal_text_color
@@ -95,8 +96,8 @@ class MenuScene(Scene):
     def do_process_events(self, event):
         system_menu_inputs(self.ecs_world, event, self._do_action)
 
-    def _do_action(self, action: CInputCommand):
-        if action.name == "START_GAME":
+    def _do_action(self, command: CInputCommand):
+        if command.name == "START_GAME" and command.phase == CommandPhase.START:
             if not self._ready_to_start:
                 system_accelerate_menu_position(self.ecs_world, self.TOP_LIMIT)
                 self._ready_to_start = True

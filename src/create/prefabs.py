@@ -52,7 +52,7 @@ def create_stars(world: esper.World, config, screen):
     stars_colors = [(star.r, star.g, star.b) for star in config.star_colors]
     number_of_stars = config.number_of_stars
     vertical_speed_range = [config.vertical_speed.min, config.vertical_speed.max]
-    blink_rate_range = [config.blink_rate.min * 100, config.blink_rate.max * 100]
+    blink_rate_range = [int(config.blink_rate.min * 100), int(config.blink_rate.max * 100)]
     star_size_range = [config.star_size.min, config.star_size.max]
     width = config.width
     for i in range(number_of_stars):
@@ -86,7 +86,7 @@ def create_player(world, player_config, screen):
         {
             "type": "player",
             "is_killed": False,
-            "is_respawning": True,
+            "is_respawning": False,
             "respawn_timer": player_config.respawn_time,
             "lives": player_config.life,
             "score": 0,
@@ -102,10 +102,11 @@ def create_player_bullet(world, player_cfg, player_position, player_surface):
     player_position = player_position.position
     bullet_surface = CSurface(engine.Vector2(bullet_size.width, bullet_size.height), engine.Color(bullet_color.r, bullet_color.g, bullet_color.b))
     bullet_speed = engine.Vector2(0, -player_cfg.bullet.speed)
-    bullet_position = engine.Vector2(player_position.x + player_surface.area.width / 2 - bullet_size.width / 2, player_position.y)
+    bullet_position = engine.Vector2(player_position.x + player_surface.area.width / 2 - bullet_size.width / 2, player_position.y - (bullet_size.height - 1))
     bullet_metadata = CMetadata(
         {
             "type": "player_bullet",
+            "is_fired": False,
         },
     )
     return create_square(world, bullet_surface, CTransform(bullet_position), CSpeed(bullet_speed), CTagPlayerBullet(), metadata=bullet_metadata)
@@ -159,11 +160,15 @@ def create_enemies(world: esper.World, level_config, enemy_config, screen):
                     "bullet_cfg": enemy.bullet,
                     "chasing_speed": enemy.chasing_speed,
                     "is_chasing": False,
+                    "is_spawned": False,
+                    "spawn_timer": {
+                        "current": enemies_row.spawn_delay,
+                        "initial": enemies_row.spawn_delay,
+                    },
                     "points": enemy.points,
                     "ghost_position": [position.x, position.y],
                     "chasing_data": {
                         "chasing_status": EnemyChasingStatus.STOP,
-                        "sync_animation": False,
                     },
                 },
             )
@@ -213,8 +218,10 @@ def create_inputs(world: esper.World):
     a_input = world.create_entity()
     d_input = world.create_entity()
     p_input = world.create_entity()
+    z_input = world.create_entity()
 
     world.add_component(space_input, CInputCommand("PLAYER_FIRE", engine.K_SPACE))
+    world.add_component(z_input, CInputCommand("PLAYER_FIRE", engine.K_z))
     world.add_component(left_input, CInputCommand("PLAYER_LEFT", engine.K_LEFT))
     world.add_component(a_input, CInputCommand("PLAYER_LEFT", engine.K_a))
     world.add_component(right_input, CInputCommand("PLAYER_RIGHT", engine.K_RIGHT))
@@ -225,4 +232,6 @@ def create_inputs(world: esper.World):
 def create_main_menu_inputs(world: esper.World):
     # Keyboard inputs
     start_game_input = world.create_entity()
+    z_input = world.create_entity()
+    world.add_component(z_input, CInputCommand("START_GAME", engine.K_z))
     world.add_component(start_game_input, CInputCommand("START_GAME", engine.K_SPACE))

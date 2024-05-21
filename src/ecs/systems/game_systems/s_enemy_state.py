@@ -16,14 +16,17 @@ image_service = ServiceLocator.images_service
 
 
 def system_enemy_state(world, enemy_cfg):
-    components = world.get_components(CTransform, CSurface, CAnimation, CMetadata, CTagEnemy)
+    components = world.get_components(CTransform, CSurface, CMetadata, CTagEnemy)
 
-    for _, (c_transform, c_surface, c_animation, c_metadata, c_tag) in components:
+    for entity, (c_transform, c_surface, c_metadata, c_tag) in components:
+        try:
+            c_animation = world.component_for_entity(entity, CAnimation)
+        except KeyError:
+            c_animation = None
         if c_metadata.is_chasing:
             current_enemy_cfg = getattr(enemy_cfg, c_tag.type)
             pivot_image = image_service.get(current_enemy_cfg.pivot_image)
-            # ToDo: Fix bug related with the animations. Sometimes the enemies disappear
-            if hasattr(current_enemy_cfg, "animations"):
+            if c_animation is not None:
                 set_animation(c_animation, 0)
             if c_metadata.chasing_data["chasing_status"] == EnemyChasingStatus.STOP:
                 _do_stop_state(c_surface)
@@ -43,13 +46,15 @@ def _do_rotate(c_surface, c_metadata, c_animation, pivot_image, increment, valid
         angle = c_surface.angle + increment
         if validator(angle):
             c_surface.rotate(pivot_image, increment)
-            c_animation.is_enabled = False
+            if c_animation is not None:
+                c_animation.is_enabled = False
         else:
-            c_animation.is_enabled = True
+            if c_animation is not None:
+                c_animation.is_enabled = True
 
 
 def _do_rotate_sprite(c_surface, c_metadata, c_tag, current_enemy_cfg, c_animation):
-    if c_animation.is_enabled:
+    if c_animation and c_animation.is_enabled or c_tag.type == "enemy_4":
         if c_surface.angle >= 0:
             c_surface.angle = 0
         elif c_surface.angle <= -180:

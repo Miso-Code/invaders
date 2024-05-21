@@ -1,3 +1,5 @@
+import asyncio
+
 from src.engine.scenes.game_scene import GameScene
 from src.engine.scenes.menu_scene import MenuScene
 from src.engine.services.service_locator import ServiceLocator
@@ -12,6 +14,7 @@ class GameEngine:
     image_service = ServiceLocator.images_service
     text_service = ServiceLocator.text_service
     score_service = ServiceLocator.score_service
+    level_service = ServiceLocator.level_service
 
     def __init__(self) -> None:
         self._current_scene = None
@@ -23,7 +26,7 @@ class GameEngine:
         self.delta_time = 0
         self.init_game()
 
-    def run(self, start_scene) -> None:
+    async def run(self, start_scene) -> None:
         self.is_running = True
         self._current_scene = self._scenes[start_scene]
         self._create()
@@ -33,6 +36,7 @@ class GameEngine:
             self._update()
             self._draw()
             self._handle_switch_scene()
+            await asyncio.sleep(0)
         self._do_clean()
 
     @property
@@ -56,7 +60,7 @@ class GameEngine:
     def _init_window(self):
         self.wrapper.set_caption(self.window_cfg.title)
         window_size = (self.window_cfg.size.w, self.window_cfg.size.h)
-        self.screen = self.wrapper.display_set_mode(window_size, self.wrapper.engine.SCALED)
+        self.screen = self.wrapper.display_set_mode(window_size, 0)
         self.fps = self.window_cfg.framerate
 
     def _init_music(self):

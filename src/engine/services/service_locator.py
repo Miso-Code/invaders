@@ -1,4 +1,5 @@
 from src.engine.services.images_service import ImagesService
+from src.engine.services.level_service import LevelService
 from src.engine.services.score_service import ScoreService
 from src.engine.services.sounds_service import SoundsService
 from src.engine.services.text_service import TextService
@@ -9,3 +10,4 @@ class ServiceLocator:
     sounds_service = SoundsService()
     text_service = TextService()
     score_service = ScoreService(0)
+    level_service = LevelService()
